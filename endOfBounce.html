@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style type="text/css">
+	body {
+		margin: 0;
+		width: 100vw;
+		height: 100vh;
+	}
+	#box {
+		background-color: black;
+		position: absolute;
+		left: 0px;
+		top: 0px;
+	}
+	#ball {
+		background-color: red;
+		border-radius: 50%;
+		position: absolute;
+		width: 50px;
+		height: 50px;
+	}
+	#angle {
+		background-color: blue;
+		position: absolute;
+		width: 100px;
+		height: 10px;
+	}
+	#end {
+		background-color: green;
+		border-radius: 50%;
+		position: absolute;
+		width: 25px;
+		height: 25px;
+	}
+	#start {
+		background-color: green;
+		border-radius: 50%;
+		position: absolute;
+		width: 25px;
+		height: 25px;
+	}
+</style>
+<script type="text/javascript">
+	const FPS = 1000 / 60;
+	var mousePos = {x: 0, y: 0};
+	var keyEvent = [0, 0, 0, 0];
+
+	var box = {w: 10, h: 7};
+	var ball = {x: 4, y: 3, a: 45 / 180 * Math.PI};
+
+	function main() {
+		if (keyEvent[0]) {ball.y -= 1/ 20};
+		if (keyEvent[1]) {ball.y += 1/ 20};
+		if (keyEvent[2]) {ball.x -= 1/ 20};
+		if (keyEvent[3]) {ball.x += 1/ 20};
+		ball.a = direction(ball.x * 50, ball.y * 50, mousePos.x, mousePos.y);
+		redraw();
+	}
+
+	function endOfBounce(x, y, a, w, h) {
+		return (0.5 * h + (h * Math.asin(Math.sin((Math.PI * (w * Math.tan(a) - x * Math.tan(a) - (y * Math.tan(a)) / Math.tan(a) - 0.5 * h)) / h)))/ Math.PI);
+	}
+
+	function redraw() {
+		var e = document.getElementById("box");
+		e.style.width = (box.w * 50) + "px";
+		e.style.height = (box.h * 50) + "px";
+
+		e = document.getElementById("ball");
+		e.style.left = (ball.x * 50 - 25) + "px";
+		e.style.top = (ball.y * 50 - 25) + "px";
+
+		e = document.getElementById("angle");
+		e.style.left = (ball.x * 50) + "px";
+		e.style.top = (ball.y * 50 - 5) + "px";
+		e.style.transform = "translate(-50px, 0px) rotate(" + (ball.a / Math.PI * 180) + "deg)translate(50px, 0px) ";
+
+		var pos = endOfBounce(ball.x, ball.y, -ball.a, box.w, box.h); 
+		var e = document.getElementById("end");
+		e.style.left = (box.w * 50 - 12.5) + "px";
+		e.style.top = (pos * 50 - 12.5) + "px";
+
+		var pos = endOfBounce(ball.x, ball.y, -ball.a, 0, box.h); 
+		var e = document.getElementById("start");
+		e.style.left = (-12.5) + "px";
+		e.style.top = (pos * 50 - 12.5) + "px";
+	}
+
+
+	window.onload = function() {
+		document.body.onmousemove = function(){mouseCoords(event);}
+		document.body.onkeydown = function(){keyPressed(event);}
+		document.body.onkeyup = function(){keyReleased(event);}
+
+		setInterval(function(){main()}, FPS);
+	}
+	function mouseCoords(e){
+		mousePos.x = e.clientX;
+		mousePos.y = e.clientY;
+	}
+	function keyPressed(e){
+		if(e.keyCode === 87){keyEvent[0] = 1;}//W
+		if(e.keyCode === 83){keyEvent[1] = 1;}//S
+		if(e.keyCode === 65){keyEvent[2] = 1;}//A
+		if(e.keyCode === 68){keyEvent[3] = 1;}//D
+	}
+	function keyReleased(e){
+		if(e.keyCode === 87){keyEvent[0] = 0;}
+		if(e.keyCode === 83){keyEvent[1] = 0;}
+		if(e.keyCode === 65){keyEvent[2] = 0;}
+		if(e.keyCode === 68){keyEvent[3] = 0;}
+	}
+	function direction(x1,y1,x2,y2){
+		let a,b,c,q,r;
+		if(y1<=y2){if(x1<x2){q=0;}}
+		if(y1<y2){if(x1>=x2){q=1;}}
+		if(y1>=y2){if(x1>x2){q=2;}}
+		if(y1>y2){if(x1<=x2){q=3;}}
+		a=Math.abs(x1-x2);
+		b=Math.abs(y1-y2);
+		if(x1!=x2&&y1!=y2){if(q==1||q==3){c=a/b;}else{c=b/a;}}else{c=0;}
+		r=(Math.atan(c)+q*(Math.PI*0.5));
+		return (r);
+	}
+</script>
+</head>
+<body>
+	<div id="box"></div>
+	<div id="ball"></div>
+	<div id="angle"></div>
+	<div id="start"></div>
+	<div id="end"></div>
+</body>
+</html>
